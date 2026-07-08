@@ -2,12 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
@@ -15,4 +17,4 @@ ENV PORT=1337
 
 EXPOSE 1337
 
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]

@@ -518,7 +518,7 @@ export interface ApiBusinessBusiness extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     location: Schema.Attribute.Component<'shared.location', false>;
     logo: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
-    name: Schema.Attribute.Text;
+    name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     schedule: Schema.Attribute.Component<'shared.schedule', false>;
     seo: Schema.Attribute.Component<'shared.seo', false>;
