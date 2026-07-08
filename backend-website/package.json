@@ -36,6 +36,14 @@
     "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "core-js-pure",
+      "esbuild",
+      "sharp"
+    ]
+  },
   "strapi": {
     "uuid": "45f233aa-cf05-4b32-ac92-ec40797f2413",
     "installId": "3f6e790a92e2333d11beb9064e80a6f3b9fb8d90d6db2ca8334751a302482f14"
