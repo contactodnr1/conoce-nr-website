@@ -24,6 +24,7 @@ const config: Core.Config.Middlewares = [
         'https://nicolasromero.mx',
         'https://*.pages.dev',
         'http://localhost:4321',
+        'https://conoce-nr-website-production.up.railway.app'
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
