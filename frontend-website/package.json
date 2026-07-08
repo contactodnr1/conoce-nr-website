@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy": "astro build && wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
@@ -23,7 +24,8 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@types/nprogress": "^0.2.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.12.1"
   },
   "overrides": {
     "vite": "^7"
