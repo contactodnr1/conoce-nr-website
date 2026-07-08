@@ -23,6 +23,7 @@ const config: Core.Config.Middlewares = [
       origin: [
         'https://nicolasromero.mx',
         'https://*.pages.dev',
+        'https://*.workers.dev',
         'http://localhost:4321',
         'https://conoce-nr-website-production.up.railway.app'
       ],
