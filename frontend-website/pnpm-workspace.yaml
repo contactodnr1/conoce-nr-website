@@ -1,0 +1,12 @@
+ignoredBuiltDependencies:
+  - workerd
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - core-js-pure
+  - esbuild
+  - sharp
+  - workerd
+
+overrides:
+  vite: ^7
