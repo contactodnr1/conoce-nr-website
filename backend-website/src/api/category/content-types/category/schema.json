@@ -52,11 +52,11 @@
       "relation": "oneToMany",
       "target": "api::business.business"
     },
-    "area": {
+    "areas": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToMany",
       "target": "api::area.area",
-      "mappedBy": "category"
+      "mappedBy": "categories"
     }
   }
 }

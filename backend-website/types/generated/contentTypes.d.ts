@@ -453,10 +453,9 @@ export interface ApiAreaArea extends Struct.CollectionTypeSchema {
   attributes: {
     active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     categories: Schema.Attribute.Relation<
-      'oneToMany',
+      'manyToMany',
       'api::category.category'
     >;
-    category: Schema.Attribute.Relation<'oneToOne', 'api::category.category'>;
     coverImage: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios'
     >;
@@ -546,7 +545,7 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   };
   attributes: {
     active: Schema.Attribute.Boolean;
-    area: Schema.Attribute.Relation<'oneToOne', 'api::area.area'>;
+    areas: Schema.Attribute.Relation<'manyToMany', 'api::area.area'>;
     businesses: Schema.Attribute.Relation<
       'oneToMany',
       'api::business.business'

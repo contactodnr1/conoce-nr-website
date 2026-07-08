@@ -50,14 +50,9 @@
     },
     "categories": {
       "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::category.category"
-    },
-    "category": {
-      "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToMany",
       "target": "api::category.category",
-      "inversedBy": "area"
+      "inversedBy": "areas"
     }
   }
 }
