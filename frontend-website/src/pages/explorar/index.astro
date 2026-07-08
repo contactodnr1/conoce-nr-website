@@ -1,0 +1,128 @@
+---
+export const prerender = false;
+import Layout from "../../layouts/Layout.astro";
+
+import { getCategories } from "../../services/getCategories/getCategories";
+import { getAreas } from "../../services/getAreas/getAreas";
+import { getBusinessesLight } from "../../services/businesses/getBusinessesLight";
+import BusinessCard from "../../components/global/BusinessCard.astro";
+import SearchBar from "../../components/global/SearchBar.astro";
+import EmptyState from "../../components/global/EmptyState.astro";
+import SectionHeader from "../../components/global/SectionHeader.astro";
+import AreaCard from "../../components/layout/AreaCard.astro";
+import CategoryCard from "../../components/layout/CategoryCard.astro";
+
+const searchQuery = Astro.url.searchParams.get("q")?.toLowerCase().trim() ?? "";
+
+const categories = await getCategories();
+const areas = await getAreas();
+const businesses = await getBusinessesLight();
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder-business.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+
+function richText(blocks: any[]): string {
+  if (!Array.isArray(blocks)) return "";
+  return blocks.map((b) => b.children?.map((c: any) => c.text).join("")).join(" ");
+}
+
+const filteredBusinesses = searchQuery
+  ? businesses.filter((b) =>
+      b.name.toLowerCase().includes(searchQuery) ||
+      b.shortDescription?.toLowerCase().includes(searchQuery) ||
+      b.categories?.some((c: any) => c.name.toLowerCase().includes(searchQuery)) ||
+      b.area?.name.toLowerCase().includes(searchQuery)
+    )
+  : [];
+---
+
+<Layout title="Explorar" description="Explora y descubre negocios, servicios y comercios locales en Nicolás Romero, Estado de México. Filtra por categoría, área y más.">
+  <section class="mx-auto max-w-7xl py-10 p-4">
+
+    <!-- Hero buscador -->
+    <div class="mb-12 text-center">
+      <h1 class="text-5xl font-bold tracking-tight">Explora Nicolás Romero</h1>
+      <p class="mt-4 text-lg text-gray-500">Descubre negocios, servicios y comercios locales.</p>
+      <SearchBar variant="hero" value={searchQuery} class="mt-8 mx-auto" />
+    </div>
+
+    {searchQuery ? (
+      <section class="mb-8">
+        <div class="mb-6 flex items-center justify-between flex-wrap gap-2">
+          <h2 class="text-2xl font-bold">
+            Resultados para "{searchQuery}"
+            <span class="text-base font-normal text-gray-400 ml-2">({filteredBusinesses.length})</span>
+          </h2>
+          <a href="/explorar" class="text-sm font-medium text-gray-400 hover:text-gray-700 transition-colors flex items-center gap-1">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Limpiar búsqueda
+          </a>
+        </div>
+
+        {filteredBusinesses.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredBusinesses.map((business) => (
+              <BusinessCard business={business} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState 
+            icon="🔍" 
+            title="Sin resultados" 
+            description={`No encontramos negocios que coincidan con "${searchQuery}".`} 
+          />
+        )}
+      </section>
+    ) : (
+      <>
+        <section class="mb-12">
+          <SectionHeader title="Áreas" href="/areas" />
+          <div class="flex gap-1 overflow-x-auto pb-2">
+            {areas.map((area) => (
+              <AreaCard area={area} class="min-w-72" />
+            ))}
+          </div>
+        </section>
+        
+        <section class="mb-12">
+          <SectionHeader title="Categorías" href="/categorias" />
+          <div class="flex gap-1 overflow-x-auto pb-2">
+            {categories.map((category) => (
+              <CategoryCard category={category} variant="card" class="min-w-55" />
+            ))}
+          </div>
+        </section>
+        {categories.map((category) => {
+          const categoryBusinesses = businesses.filter((b) =>
+            b.categories?.some((c) => c.documentId === category.documentId)
+          );
+          if (!categoryBusinesses.length) return null;
+
+          return (
+            <section class="mb-16">
+              <SectionHeader 
+                title={category.name} 
+                href={`/categorias/${category.slug}`} 
+              />
+              <div class="flex gap-1 overflow-x-auto pb-2">
+                {categoryBusinesses.slice(0, 10).map((business) => (
+                  <div class="min-w-75">
+                    <BusinessCard business={business} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </>
+    )}
+
+  </section>
+</Layout>

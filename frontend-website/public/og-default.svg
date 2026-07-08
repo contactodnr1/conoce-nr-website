@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F04E37"/>
+  <g transform="translate(600,315)" text-anchor="middle">
+    <text x="0" y="-60" font-family="system-ui,sans-serif" font-size="72" font-weight="900" fill="white">NR</text>
+    <text x="0" y="20" font-family="system-ui,sans-serif" font-size="28" font-weight="600" fill="rgba(255,255,255,0.9)">Descubre Nicolás Romero</text>
+    <text x="0" y="60" font-family="system-ui,sans-serif" font-size="18" fill="rgba(255,255,255,0.7)">Directorio Municipal</text>
+  </g>
+</svg>

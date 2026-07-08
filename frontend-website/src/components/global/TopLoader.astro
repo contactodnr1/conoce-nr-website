@@ -1,0 +1,114 @@
+---
+// Barra de progreso superior (equivalente a nextjs-toploader para Astro + ClientRouter).
+interface Props {
+  /** Color de la barra */
+  color?: string;
+  /** Altura en px */
+  height?: number;
+  /** Mostrar spinner en la esquina */
+  showSpinner?: boolean;
+}
+
+const {
+  color = "#F04E37",
+  height = 3,
+  showSpinner = false,
+} = Astro.props;
+---
+
+<div
+  id="top-loader-config"
+  data-color={color}
+  data-height={String(height)}
+  data-spinner={String(showSpinner)}
+  hidden
+/>
+
+<style is:global>
+  #nprogress {
+    pointer-events: none;
+  }
+
+  #nprogress .bar {
+    background: var(--top-loader-color, #f04e37);
+    position: fixed;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--top-loader-height, 3px);
+  }
+
+  #nprogress .peg {
+    display: block;
+    position: absolute;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    box-shadow:
+      0 0 10px var(--top-loader-color, #f04e37),
+      0 0 5px var(--top-loader-color, #f04e37);
+    opacity: 1;
+    transform: rotate(3deg) translate(0, -4px);
+  }
+
+  #nprogress .spinner {
+    display: block;
+    position: fixed;
+    z-index: 99999;
+    top: 15px;
+    right: 15px;
+  }
+
+  #nprogress .spinner-icon {
+    width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    border-top-color: var(--top-loader-color, #f04e37);
+    border-left-color: var(--top-loader-color, #f04e37);
+    border-radius: 50%;
+    animation: nprogress-spinner 400ms linear infinite;
+  }
+
+  @keyframes nprogress-spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<script>
+  import NProgress from "nprogress";
+
+  function initTopLoader() {
+    if ((window as any).__topLoaderReady) return;
+    (window as any).__topLoaderReady = true;
+
+    const config = document.getElementById("top-loader-config");
+    const color = config?.dataset.color ?? "#F04E37";
+    const height = Number(config?.dataset.height ?? 3);
+    const showSpinner = config?.dataset.spinner === "true";
+
+    document.documentElement.style.setProperty("--top-loader-color", color);
+    document.documentElement.style.setProperty("--top-loader-height", `${height}px`);
+
+    NProgress.configure({
+      showSpinner,
+      trickleSpeed: 200,
+      minimum: 0.08,
+      easing: "ease",
+      speed: 200,
+    });
+
+    document.addEventListener("astro:before-preparation", () => NProgress.start());
+    document.addEventListener("astro:page-load", () => NProgress.done());
+    document.addEventListener("astro:after-swap", () => NProgress.done());
+  }
+
+  initTopLoader();
+  document.addEventListener("astro:page-load", initTopLoader);
+</script>

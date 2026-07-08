@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Página no encontrada" description="La página que buscas no existe. Regresa al inicio para descubrir negocios en Nicolás Romero.">
+  <section class="flex min-h-[60vh] items-center justify-center px-4 py-20">
+    <div class="text-center max-w-md">
+      <p class="text-8xl font-black text-primary leading-none">404</p>
+      <h1 class="mt-4 text-2xl font-bold text-gray-900">Página no encontrada</h1>
+      <p class="mt-2 text-sm text-gray-500">
+        La página que buscas no existe o fue movida. 
+        Tal vez el enlace esté mal escrito o el negocio ya no esté disponible.
+      </p>
+      <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Ir al inicio
+        </a>
+        <a
+          href="/explorar"
+          class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          Explorar negocios
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* Reemplaza tu @theme con esto */
+@theme {
+    /* Brand — coral cálido como Airbnb */
+    --color-primary: #F04E37;
+    --color-primary-hover: #D63E28;
+  
+    /* Accent — dorado para ratings */
+    --color-accent: #FFB400;
+  
+    /* Surfaces */
+    --color-background: #FFFFFF;
+    --color-surface: #F7F7F7;
+  
+    /* Text */
+    --color-text: #222222;
+    --color-muted: #717171;
+  
+    /* Borders */
+    --color-border: #DDDDDD;
+  
+    --radius-card: 1.5rem;
+  }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  overflow-x: hidden;
+}

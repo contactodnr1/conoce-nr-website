@@ -1,0 +1,68 @@
+---
+import { resolveImageUrl } from "../../utils/image";
+import { richTextToString } from "../../utils/richTextToString";
+
+interface Props {
+  /** Datos del área */
+  area: {
+    name: string;
+    slug: string;
+    description?: any;
+    icon?: { url: string; alternativeText?: string | null };
+    coverImage?: { url: string; alternativeText?: string | null };
+  };
+  businessCount?: number;
+  class?: string;
+}
+
+const { area, businessCount, class: extraClass = "" } = Astro.props;
+
+const coverSrc = resolveImageUrl(area.coverImage?.url, "/images/placeholder-business.svg");
+const iconSrc  = area.icon?.url ? resolveImageUrl(area.icon.url) : null;
+const descText = area.description ? richTextToString(area.description) : "";
+---
+
+<a
+  href={`/areas/${area.slug}`}
+  class:list={[
+    "area-card group rounded-3xl border border-gray-100 bg-white transition hover:shadow-xl hover:-translate-y-0.5 duration-300",
+    extraClass,
+  ]}
+  data-name={area.name.toLowerCase()}
+  data-count={businessCount ?? 0}
+>
+  <!-- Imagen + overlay -->
+  <div class="relative h-48 overflow-visible rounded-t-3xl">
+    <div class="h-48 overflow-hidden rounded-t-3xl">
+      <img
+        src={coverSrc}
+        alt={area.name}
+        loading="lazy"
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+      />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent rounded-t-3xl"></div>
+
+    <!-- Badge de cantidad -->
+    {businessCount !== undefined && (
+      <span class="absolute right-3 top-3 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[11px] font-semibold text-gray-800">
+        {businessCount} {businessCount === 1 ? "negocio" : "negocios"}
+      </span>
+    )}
+
+    <!-- Ícono flotante -->
+    {iconSrc && (
+      <div class="absolute -bottom-5 left-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-md border border-gray-100 z-10">
+        <img src={iconSrc} alt={area.name} class="h-7 w-7 object-contain" loading="lazy" />
+      </div>
+    )}
+  </div>
+
+  <!-- Info -->
+  <div class:list={["px-4 pb-4", iconSrc ? "pt-7" : "pt-4"]}>
+    <h3 class="font-semibold text-base leading-tight text-gray-900">{area.name}</h3>
+    {descText && (
+      <p class="mt-1.5 line-clamp-2 text-sm text-gray-500">{descText}</p>
+    )}
+  </div>
+</a>

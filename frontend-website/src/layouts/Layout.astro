@@ -1,0 +1,112 @@
+---
+// src/layouts/Layout.astro
+// Layout principal con meta tags SEO completos, Open Graph, geo meta y preconnect.
+
+import SocialDock from '../components/global/SocialDock.astro'
+import TopLoader from '../components/global/TopLoader.astro'
+import Footer from '../components/layout/Footer.astro'
+import Navbar from '../components/layout/Navbar.astro'
+import '../styles/global.css'
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  /** Título de la página (sin el sufijo "| Nicolás Romero") */
+  title?: string;
+  /** Meta description */
+  description?: string;
+  /** Palabras clave adicionales para el meta keywords */
+  keywords?: string;
+  /** URL de la imagen Open Graph (absoluta o relativa) */
+  ogImage?: string;
+  /** Tipo OG (por defecto: "website") */
+  ogType?: string;
+}
+
+const {
+  title = "Inicio",
+  description = "Descubre los mejores negocios, servicios y comercios de Nicolás Romero, Estado de México. Tu directorio local de confianza.",
+  keywords = "",
+  ogImage = "/og-default.svg",
+  ogType = "website",
+} = Astro.props;
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL ?? "";
+
+const fullTitle = `${title} | Nicolás Romero, Estado de México`;
+const canonicalURL = Astro.url.href;
+
+// Resolver ogImage a URL absoluta
+function resolveOgImage(img: string): string {
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  if (img.startsWith("/uploads/")) return `${STRAPI_URL}${img}`;
+  return new URL(img, Astro.site ?? Astro.url.origin).href;
+}
+
+const ogImageAbsolute = resolveOgImage(ogImage);
+
+const keywordsMeta = [
+  "negocios Nicolás Romero",
+  "directorio municipal Nicolás Romero",
+  "comercios Estado de México",
+  keywords,
+].filter(Boolean).join(", ");
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Título y SEO básico -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywordsMeta} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageAbsolute} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="Descubre Nicolás Romero" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbsolute} />
+
+    <!-- Geo SEO local — Nicolás Romero, Estado de México -->
+    <meta name="geo.region" content="MX-MEX" />
+    <meta name="geo.placename" content="Nicolás Romero, Estado de México" />
+    <meta name="geo.position" content="19.6333;-99.3000" />
+    <meta name="ICBM" content="19.6333, -99.3000" />
+
+    <!-- Preconnect al servidor de Strapi para reducir latencia DNS -->
+    {STRAPI_URL && (
+      <link rel="preconnect" href={STRAPI_URL} />
+    )}
+
+    <!-- Slot para JSON-LD y otros meta tags de páginas específicas -->
+    <slot name="head" />
+    <ClientRouter />
+  </head>
+  <body transition:animate="fade">
+    <TopLoader color="#F04E37" />
+    <Navbar/>
+    <SocialDock/>
+    <slot />
+    <Footer/>
+  </body>
+</html>

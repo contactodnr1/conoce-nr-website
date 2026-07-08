@@ -1,0 +1,81 @@
+---
+// src/components/layout/CategoryCard.astro
+// Card reutilizable de categoría. Extrae el patrón duplicado de categorias/index.astro y explorar/index.astro.
+
+import { resolveImageUrl } from "../../utils/image";
+import { richTextToString } from "../../utils/richTextToString";
+
+interface Props {
+  /** Datos de la categoría */
+  category: {
+    name: string;
+    slug: string;
+    description?: any;
+    icon?: { url: string; alternativeText?: string | null };
+    image?: { url: string; alternativeText?: string | null };
+  };
+  /** Cantidad de negocios en la categoría (opcional) */
+  businessCount?: number;
+  /** Clases extra para el wrapper */
+  class?: string;
+  /** Variante: "grid" (cuadrada compacta) o "card" (más alta con descripción) */
+  variant?: "grid" | "card";
+}
+
+const { category, businessCount, class: extraClass = "", variant = "grid" } = Astro.props;
+
+const imageSrc = resolveImageUrl(category.image?.url, "/images/placeholder-business.svg");
+const iconSrc  = category.icon?.url ? resolveImageUrl(category.icon.url) : null;
+const descText = category.description ? richTextToString(category.description) : "";
+
+const isCard = variant === "card";
+---
+
+<a
+  href={`/categorias/${category.slug}`}
+  class:list={[
+    "category-card group rounded-2xl border border-gray-100 bg-white overflow-hidden transition hover:shadow-lg hover:-translate-y-0.5 duration-300",
+    extraClass,
+  ]}
+  data-name={category.name.toLowerCase()}
+  data-count={businessCount ?? 0}
+>
+  <!-- Imagen -->
+  <div class:list={["relative overflow-hidden", isCard ? "h-36" : "h-32"]}>
+    <img
+      src={imageSrc}
+      alt={category.name}
+      loading="lazy"
+      class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+
+    <!-- Ícono flotante -->
+    {iconSrc && (
+      <div class:list={[
+        "absolute bottom-2 left-2 flex items-center justify-center rounded-lg bg-white shadow-md",
+        isCard ? "h-10 w-10" : "h-9 w-9",
+      ]}>
+        <img
+          src={iconSrc}
+          alt={category.name}
+          class:list={["object-contain", isCard ? "h-6 w-6" : "h-5 w-5"]}
+          loading="lazy"
+        />
+      </div>
+    )}
+  </div>
+
+  <!-- Info -->
+  <div class="px-3 py-3">
+    <h3 class="font-semibold text-sm leading-tight text-gray-900 truncate">{category.name}</h3>
+    {businessCount !== undefined && (
+      <p class="mt-0.5 text-xs text-gray-400">
+        {businessCount} {businessCount === 1 ? "negocio" : "negocios"}
+      </p>
+    )}
+    {isCard && descText && (
+      <p class="mt-1 line-clamp-2 text-xs text-gray-500">{descText}</p>
+    )}
+  </div>
+</a>

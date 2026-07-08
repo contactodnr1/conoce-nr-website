@@ -1,0 +1,165 @@
+---
+import { getFeaturedBusinesses } from "../../services/getFeaturedBussines/getfeaturedBussinnes";
+
+const businesses = await getFeaturedBusinesses();
+const loopList = [...businesses, ...businesses];
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+---
+
+<div class="flex flex-col gap-4">
+  <div class="flex justify-center">
+    <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-medium text-gray-500 shadow-sm">
+      <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      Mejor calificados hoy
+    </span>
+  </div>
+
+  <div class="relative h-[560px] overflow-hidden rounded-2xl">
+    <div class="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white to-transparent z-10"></div>
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent z-10"></div>
+
+    <div class="absolute inset-x-0 top-0 flex flex-col gap-3.5 px-1" id="feedTrack">
+      {loopList.map((biz) => (
+        <div class="relative shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <a href={`/negocios/${biz.slug}`} class="absolute inset-0 z-10"></a>
+
+          <div class="relative h-20">
+            <img
+              src={biz.coverImage?.url ? `${STRAPI_URL}${biz.coverImage.url}` : "/images/placeholder-business.svg"}
+              alt={biz.name}
+              loading="lazy"
+              class="h-full w-full object-cover"
+            />
+            <div class="absolute right-2.5 top-2.5 flex gap-1.5">
+              <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white ${biz.active ? "bg-emerald-500/90" : "bg-black/50"}`}>
+                {biz.active ? "Abierto" : "Cerrado"}
+              </span>
+              {biz.verified && (
+                <span class="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-medium text-emerald-900">
+                  <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  Verificado
+                </span>
+              )}
+            </div>
+            <div class="absolute -bottom-5 left-3.5">
+              <div class="relative h-11 w-11">
+                <div class="h-11 w-11 overflow-hidden rounded-xl border-2 border-white bg-gray-50 shadow-sm">
+                  <img
+                    src={biz.logo?.url ? `${STRAPI_URL}${biz.logo.url}` : "/images/placeholder-logo.svg"}
+                    alt={`Logo de ${biz.name}`}
+                    loading="lazy"
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+                {biz.featured && (
+                  <span class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[9px] shadow-sm">
+                    ⭐
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div class="px-3.5 pb-3 pt-7">
+            <p class="truncate text-sm font-semibold text-gray-900 m-0 leading-tight">{biz.name}</p>
+            <p class="mt-0.5 mb-2 text-[11px] text-gray-400 m-0">
+              {biz.categories?.map((cat) => cat.name).join(" · ")}
+            </p>
+
+            {biz.shortDescription && (
+              <p class="mb-2.5 text-[11px] leading-relaxed text-gray-500 line-clamp-2 m-0">
+                {biz.shortDescription}
+              </p>
+            )}
+
+            <div class="mb-2 flex items-center gap-2 min-w-0">
+              {biz.area?.name && (
+                <span class="inline-flex shrink-0 items-center gap-1 text-[11px] text-gray-400">
+                  <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {biz.area.name}
+                </span>
+              )}
+              {biz.location?.address && (
+                <span class="truncate text-[11px] text-gray-400 min-w-0">📍 · {biz.location.address}</span>
+              )}
+            </div>
+
+            <div class="flex items-center justify-between border-t border-gray-100 pt-2">
+              <div class="flex items-center gap-1.5">
+                {biz.homeDelivery && (
+                  <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-600">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12" />
+                    </svg>
+                    Delivery
+                  </span>
+                )}
+                {biz.acceptsCard && (
+                  <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Tarjeta
+                  </span>
+                )}
+                {!biz.homeDelivery && !biz.acceptsCard && (
+                  <span class="text-[11px] text-gray-300">Sin servicios adicionales</span>
+                )}
+              </div>
+
+              {biz.contact?.phone && !biz.contact?.whatsapp && (
+                <span class="relative z-20 text-[11px] text-gray-400">
+                  📞 {biz.contact.phone}
+                </span>
+              )}
+
+              {biz.contact?.whatsapp && (
+                <a
+                  href={`https://wa.me/${biz.contact.whatsapp.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="relative z-20 inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-600 transition-colors"
+                >
+                  <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.522 5.843L.054 23.447a.5.5 0 00.609.61l5.7-1.494A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.694-.5-5.241-1.375l-.371-.217-3.853 1.01 1.023-3.748-.237-.386A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                  </svg>
+                  Contactar
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  const track = document.getElementById("feedTrack") as HTMLElement;
+
+  function getHalfHeight() {
+    const cards = Array.from(track.children) as HTMLElement[];
+    const half = cards.length / 2;
+    let total = 0;
+    for (let i = 0; i < half; i++) total += cards[i].offsetHeight + 14;
+    return total;
+  }
+
+  const HALF = getHalfHeight();
+  const SPEED = 0.25;
+  let offset = 0;
+
+  function animate() {
+    offset += SPEED;
+    if (offset >= HALF) offset = 0;
+    track.style.transform = `translateY(-${offset}px)`;
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+</script>

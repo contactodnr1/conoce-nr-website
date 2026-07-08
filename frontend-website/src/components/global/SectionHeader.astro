@@ -1,0 +1,23 @@
+---
+
+interface Props {
+  title: string;
+  href?: string;
+  linkLabel?: string;
+  class?: string;
+}
+
+const { title, href, linkLabel = "Ver todos →", class: extraClass = "" } = Astro.props;
+---
+
+<div class:list={["mb-6 flex items-center justify-between", extraClass]}>
+  <h2 class="text-2xl font-bold text-gray-900">{title}</h2>
+  {href && (
+    <a
+      href={href}
+      class="text-sm font-medium text-primary hover:opacity-80 transition-opacity flex items-center gap-1"
+    >
+      {linkLabel}
+    </a>
+  )}
+</div>

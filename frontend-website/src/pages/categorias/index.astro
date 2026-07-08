@@ -1,0 +1,120 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCategories } from "../../services/getCategories/getCategories";
+import { getBusinessesLight } from "../../services/businesses/getBusinessesLight";
+import CategoryCard from "../../components/layout/CategoryCard.astro";
+import EmptyState from "../../components/global/EmptyState.astro";
+
+const [categories, businesses] = await Promise.all([
+  getCategories(),
+  getBusinessesLight(),
+]);
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder-business.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+
+const categoriesWithCount = categories
+  .map((category) => ({
+    ...category,
+    businessCount: businesses.filter((b) =>
+      b.categories?.some((c: any) => c.documentId === category.documentId)
+    ).length,
+  }))
+  .sort((a, b) => b.businessCount - a.businessCount);
+
+const totalBusinesses = businesses.length;
+---
+
+<Layout title="Categorías" description="Explora negocios por categoría en Nicolás Romero, Estado de México. Restaurantes, cafeterías, hoteles y más.">
+
+  <!-- ░░ HERO ░░ -->
+  <div class="mx-auto max-w-7xl px-4 pt-10 pb-6">
+    <p class="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Explora por tipo</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Categorías</h1>
+    <p class="mt-3 max-w-2xl text-base text-gray-500">
+      {categories.length} categorías que agrupan {totalBusinesses} negocios y servicios en todo el municipio.
+    </p>
+  </div>
+
+  <div class="mx-auto max-w-7xl px-4 pb-16">
+
+    <!-- ░░ BUSCADOR + ORDEN ░░ -->
+    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="relative flex-1 max-w-md">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          id="categorySearch"
+          placeholder="Buscar categoría..."
+          class="w-full rounded-full border border-gray-200 bg-white pl-11 pr-4 py-2.5 text-sm outline-none focus:border-gray-400 transition"
+        />
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide hidden sm:inline">Ordenar</span>
+        <select
+          id="categorySort"
+          class="rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-gray-400 transition cursor-pointer"
+        >
+          <option value="popular">Más negocios</option>
+          <option value="alpha">Alfabético (A-Z)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ░░ GRID ESTILO AIRBNB ░░ -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="categoriesGrid">
+      {categoriesWithCount.map((category) => (
+        <CategoryCard category={category} businessCount={category.businessCount} variant="grid" />
+      ))}
+    </div>
+
+    <!-- Empty state -->
+    <EmptyState 
+      id="emptySearch" 
+      icon="🔍" 
+      title="Sin resultados" 
+      description="No encontramos categorías con ese nombre." 
+      visible={false} 
+    />
+
+  </div>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById("categorySearch") as HTMLInputElement;
+  const sortSelect  = document.getElementById("categorySort") as HTMLSelectElement;
+  const grid        = document.getElementById("categoriesGrid") as HTMLElement;
+  const emptyState  = document.getElementById("emptySearch");
+  const cards       = Array.from(document.querySelectorAll<HTMLElement>(".category-card"));
+
+  function filterAndSort() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const matches = card.dataset.name?.includes(query);
+      card.style.display = matches ? "" : "none";
+      if (matches) visible++;
+    });
+
+    emptyState?.classList.toggle("hidden", visible > 0);
+
+    const sorted = [...cards].sort((a, b) => {
+      if (sortSelect.value === "alpha") {
+        return (a.dataset.name ?? "").localeCompare(b.dataset.name ?? "");
+      }
+      return Number(b.dataset.count) - Number(a.dataset.count);
+    });
+    sorted.forEach((card) => grid.appendChild(card));
+  }
+
+  searchInput?.addEventListener("input", filterAndSort);
+  sortSelect?.addEventListener("change", filterAndSort);
+</script>

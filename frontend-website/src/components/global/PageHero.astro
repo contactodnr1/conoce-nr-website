@@ -1,0 +1,86 @@
+---
+// src/components/PageHero.astro
+
+interface Stat {
+  value: number | string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  imageUrl: string;
+  iconUrl?: string;
+  backHref?: string;
+  backLabel?: string;
+  stats?: Stat[];
+}
+
+const {
+  title,
+  subtitle,
+  imageUrl,
+  iconUrl,
+  backHref = "/explorar",
+  backLabel = "Explorar",
+  stats = [],
+} = Astro.props;
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+---
+
+<div class="relative h-56 md:h-72 overflow-hidden">
+  <img
+    src={img(imageUrl)}
+    alt={title}
+    class="h-full w-full object-cover"
+  />
+  <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent"></div>
+
+  <!-- Volver -->
+  <div class="absolute left-4 top-4 md:left-8">
+    <a
+      href={backHref}
+      class="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-4 py-2 text-sm font-medium text-white hover:bg-white/30 transition"
+    >
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      {backLabel}
+    </a>
+  </div>
+
+  <!-- Título + stats -->
+  <div class="absolute bottom-6 left-4 md:left-8 right-4 max-w-7xl mx-auto flex items-end justify-between">
+    <div class="flex items-center gap-4">
+      {iconUrl && (
+        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-lg">
+          <img src={img(iconUrl)} alt={title} class="h-8 w-8 object-contain"/>
+        </div>
+      )}
+      <div>
+        {subtitle && (
+          <p class="text-xs font-medium uppercase tracking-widest text-white/60 mb-1">{subtitle}</p>
+        )}
+        <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight">{title}</h1>
+      </div>
+    </div>
+
+    {stats.length > 0 && (
+      <div class="hidden md:flex items-center gap-6 text-right">
+        {stats.map((s) => (
+          <div>
+            <p class="text-2xl font-bold text-white">{s.value}</p>
+            <p class="text-xs text-white/60">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>

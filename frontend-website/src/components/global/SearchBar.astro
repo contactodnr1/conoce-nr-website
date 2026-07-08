@@ -1,0 +1,81 @@
+---
+// src/components/global/SearchBar.astro
+// Buscador global con form GET hacia /explorar.
+
+interface Props {
+  /** URL de destino del form (por defecto: /explorar) */
+  action?: string;
+  /** Placeholder del input */
+  placeholder?: string;
+  /** Valor inicial del input (para mostrar búsqueda activa) */
+  value?: string;
+  /** ID único del input para estilos/accesibilidad */
+  inputId?: string;
+  /** Variante: "hero" (grande, centrado) o "inline" (compacto) */
+  variant?: "hero" | "inline";
+  /** Clases CSS extra para el contenedor form */
+  class?: string;
+}
+
+const {
+  action = "/explorar",
+  placeholder = "Buscar negocios, categorías o áreas...",
+  value = "",
+  inputId = "globalSearch",
+  variant = "hero",
+  class: extraClass = "",
+} = Astro.props;
+
+const isHero = variant === "hero";
+---
+
+<form
+  action={action}
+  method="get"
+  role="search"
+  class:list={["w-full", isHero && "max-w-3xl mx-auto", extraClass]}
+>
+  <div
+    class:list={[
+      "flex overflow-hidden border border-gray-200 bg-white",
+      isHero
+        ? "rounded-full shadow-lg"
+        : "rounded-full shadow-sm",
+    ]}
+  >
+    {!isHero && (
+      <div class="flex items-center pl-4 pointer-events-none">
+        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    )}
+    <input
+      type="search"
+      id={inputId}
+      name="q"
+      value={value}
+      placeholder={placeholder}
+      autocomplete="off"
+      class:list={[
+        "flex-1 bg-transparent outline-none text-gray-800 placeholder:text-gray-400",
+        isHero ? "px-6 py-4 text-base" : "pl-3 pr-2 py-2.5 text-sm",
+      ]}
+      aria-label={placeholder}
+    />
+    <button
+      type="submit"
+      class:list={[
+        "shrink-0 font-medium text-white bg-primary hover:opacity-90 transition-opacity",
+        isHero ? "px-8 py-4" : "px-4 py-2 rounded-full",
+      ]}
+      aria-label="Buscar"
+    >
+      {isHero ? "Buscar" : (
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      )}
+    </button>
+  </div>
+</form>

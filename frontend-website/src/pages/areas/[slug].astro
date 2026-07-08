@@ -1,0 +1,168 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import PageHero from "../../components/global/PageHero.astro"
+import FilterAside from "../../components/global/FilterAside.astro"
+import BusinessCard from "../../components/global/BusinessCard.astro"
+import EmptyState from "../../components/global/EmptyState.astro"
+import { getAreaBySlug } from "../../services/getAreas/getAreaBySlug";
+import { getBusinessesLight } from "../../services/businesses/getBusinessesLight";
+
+const { slug } = Astro.params;
+const [area, allBusinesses] = await Promise.all([
+  getAreaBySlug(slug!),
+  getBusinessesLight(),
+]);
+if (!area) return Astro.redirect("/404");
+const areaBusinesses = allBusinesses.filter((b) => b.area?.slug === slug);
+
+const verifiedCount = areaBusinesses.filter((b) => b.verified).length;
+const categoriesInArea = area.categories ?? [];
+
+const descText = area.description
+  ?.filter((block: any) => block.children?.[0]?.text?.trim())
+  .map((block: any) => block.children.map((c: any) => c.text).join(""))
+  .join(" ") ?? "";
+
+const categoryFilters = categoriesInArea.map((cat) => ({
+  slug: cat.slug,
+  name: cat.name,
+  count: areaBusinesses.filter((b) => b.categories?.some((c: any) => c.slug === cat.slug)).length,
+}));
+
+// JSON-LD ItemList para SEO
+const siteOrigin = Astro.url.origin;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": `Negocios en ${area.name} - Nicolás Romero`,
+  "description": descText || `Descubre negocios y servicios en ${area.name}, Nicolás Romero.`,
+  "numberOfItems": areaBusinesses.length,
+  "itemListElement": areaBusinesses.slice(0, 20).map((b, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "url": `${siteOrigin}/negocios/${b.slug}`,
+    "name": b.name,
+  })),
+};
+---
+
+<Layout 
+  title={area.name}
+  description={descText || `Explora los mejores negocios ubicados en ${area.name}, Nicolás Romero, Estado de México.`}
+  ogImage={area.coverImage?.url}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  <PageHero
+    title={area.name}
+    subtitle="Área"
+    imageUrl={area.coverImage?.url ?? ""}
+    iconUrl={area.icon?.url}
+    stats={[
+      { value: areaBusinesses.length, label: "Negocios" },
+      { value: verifiedCount, label: "Verificados" },
+      { value: categoriesInArea.length, label: "Categorías" },
+    ]}
+  />
+
+  <div class="mx-auto max-w-7xl px-4 py-8">
+    {descText && (
+      <p class="mb-8 max-w-3xl text-sm leading-relaxed text-gray-500 border-b border-gray-100 pb-8">
+        {descText}
+      </p>
+    )}
+
+    <div class="flex gap-8 items-start">
+
+      <FilterAside
+        totalCount={areaBusinesses.length}
+        verifiedCount={verifiedCount}
+        filterLabel="Categorías"
+        filterAttr="data-categories"
+        filters={categoryFilters}
+      />
+
+      <div class="flex-1 min-w-0">
+
+        <!-- Filtros móvil -->
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-6 lg:hidden">
+          <button class="primary-filter shrink-0 rounded-full border border-gray-200 bg-gray-900 px-4 py-1.5 text-sm font-medium text-white" data-filter="all" aria-label="Filtrar por todos">
+            Todos
+          </button>
+          {categoriesInArea.map((cat) => (
+            <button class="primary-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600" data-filter={cat.slug} aria-label={`Filtrar por ${cat.name}`}>
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {areaBusinesses.length > 0 ? (
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" id="businessGrid">
+            {areaBusinesses.map((business) => (
+              <BusinessCard business={business} />
+            ))}
+          </div>
+          <EmptyState 
+            id="emptyFiltered" 
+            icon="🔍" 
+            title="Sin resultados" 
+            description="Prueba con otros filtros." 
+            visible={false} 
+          />
+        ) : (
+          <EmptyState 
+            icon="🏪" 
+            title="Sin negocios aún" 
+            description="Pronto habrá negocios registrados en esta área." 
+          />
+        )}
+      </div>
+
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const filters     = document.querySelectorAll<HTMLElement>(".primary-filter");
+  const cards       = document.querySelectorAll<HTMLElement>(".business-card");
+  const emptyState  = document.getElementById("emptyFiltered");
+
+  const checkVerified = document.getElementById("filterVerified") as HTMLInputElement | null;
+  const checkFeatured = document.getElementById("filterFeatured") as HTMLInputElement | null;
+  const checkDelivery = document.getElementById("filterDelivery") as HTMLInputElement | null;
+  const checkCard     = document.getElementById("filterCard")     as HTMLInputElement | null;
+
+  let activeFilter = "all";
+
+  function applyFilters() {
+    let visible = 0;
+    cards.forEach((card) => {
+      const cats     = card.dataset.categories ?? "";
+      const matchF   = activeFilter === "all" || cats.split(",").includes(activeFilter);
+      const matchV   = !checkVerified?.checked || card.dataset.verified === "true";
+      const matchFt  = !checkFeatured?.checked || card.dataset.featured === "true";
+      const matchD   = !checkDelivery?.checked || card.dataset.delivery === "true";
+      const matchC   = !checkCard?.checked     || card.dataset.card     === "true";
+      const show     = matchF && matchV && matchFt && matchD && matchC;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+    emptyState?.classList.toggle("hidden", visible > 0);
+  }
+
+  filters.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter ?? "all";
+      filters.forEach((f) => { f.classList.remove("bg-gray-900","text-white"); f.classList.add("bg-white","text-gray-600"); });
+      btn.classList.add("bg-gray-900","text-white");
+      btn.classList.remove("bg-white","text-gray-600");
+      applyFilters();
+    });
+  });
+
+  [checkVerified, checkFeatured, checkDelivery, checkCard].forEach((el) => {
+    el?.addEventListener("change", applyFilters);
+  });
+</script>

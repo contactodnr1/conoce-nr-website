@@ -1,0 +1,302 @@
+---
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+import { getCategoryBySlug } from "../../services/getCategories/getCategoryBySlug";
+import { getBusinessesLight } from "../../services/businesses/getBusinessesLight";
+import BusinessCard from "../../components/global/BusinessCard.astro";
+import EmptyState from "../../components/global/EmptyState.astro";
+
+const { slug } = Astro.params;
+const [category, allBusinesses] = await Promise.all([
+  getCategoryBySlug(slug!),
+  getBusinessesLight(),
+]);
+
+if (!category) return Astro.redirect("/404");
+const categoryBusinesses = allBusinesses.filter((b) =>
+  b.categories?.some((c: any) => c.slug === slug)
+);
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+
+const descText = category.description
+  ?.filter((block: any) => block.children?.[0]?.text?.trim())
+  .map((block: any) => block.children.map((c: any) => c.text).join(""))
+  .join(" ") ?? "";
+
+const verifiedCount = categoryBusinesses.filter((b) => b.verified).length;
+const featuredCount = categoryBusinesses.filter((b) => b.featured).length;
+const deliveryCount = categoryBusinesses.filter((b) => b.homeDelivery).length;
+
+// Áreas presentes en esta categoría para el filtro
+const areasInCategory = Array.from(
+  new Map(
+    categoryBusinesses
+      .filter((b) => b.area)
+      .map((b) => [b.area!.slug, b.area!])
+  ).values()
+);
+
+// JSON-LD ItemList para SEO
+const siteOrigin = Astro.url.origin;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": `${category.name} en Nicolás Romero`,
+  "description": descText || `Negocios de ${category.name} en Nicolás Romero, Estado de México`,
+  "numberOfItems": categoryBusinesses.length,
+  "itemListElement": categoryBusinesses.slice(0, 20).map((b, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "url": `${siteOrigin}/negocios/${b.slug}`,
+    "name": b.name,
+  })),
+};
+---
+
+<Layout
+  title={category.name}
+  description={descText || `Descubre los mejores negocios de ${category.name} en Nicolás Romero, Estado de México.`}
+  ogImage={category.image?.url}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  <!-- ░░ HERO ░░ -->
+  <div class="relative h-56 md:h-72 overflow-hidden">
+    <img
+      src={img(category.image?.url)}
+      alt={category.name}
+      class="h-full w-full object-cover"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent"></div>
+
+    <!-- Volver -->
+    <div class="absolute left-4 top-4 md:left-8">
+      <a href="/explorar" class="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur-sm px-4 py-2 text-sm font-medium text-white hover:bg-white/30 transition">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Explorar
+      </a>
+    </div>
+
+    <!-- Título -->
+    <div class="max-w-7xl mx-auto absolute bottom-6 left-4 md:left-8 right-4 flex items-end justify-between">
+      <div class="flex items-center gap-4">
+        {category.icon?.url && (
+          <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white shadow-lg">
+            <img src={img(category.icon.url)} alt={category.name} class="h-8 w-8 object-contain"/>
+          </div>
+        )}
+        <div>
+          <p class="text-xs font-medium uppercase tracking-widest text-white/60 mb-1">Categoría</p>
+          <h1 class="text-2xl md:text-4xl font-bold text-white leading-tight">{category.name}</h1>
+        </div>
+      </div>
+      <!-- Stats en hero -->
+      <div class="hidden md:flex items-center gap-6 text-right">
+        <div>
+          <p class="text-2xl font-bold text-white">{categoryBusinesses.length}</p>
+          <p class="text-xs text-white/60">Negocios</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-white">{verifiedCount}</p>
+          <p class="text-xs text-white/60">Verificados</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-white">{deliveryCount}</p>
+          <p class="text-xs text-white/60">Con delivery</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ CONTENIDO ░░ -->
+  <div class="mx-auto max-w-7xl px-4 py-8">
+
+    {descText && (
+      <p class="mb-8 max-w-3xl text-sm leading-relaxed text-gray-500 border-b border-gray-100 pb-8">
+        {descText}
+      </p>
+    )}
+
+    <div class="flex gap-8 items-start">
+
+      <!-- ── ASIDE FILTROS ── -->
+      <aside class="hidden lg:block w-56 shrink-0">
+        <div class="sticky top-6 space-y-6">
+
+          <!-- Mini stats -->
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-2xl bg-gray-50 p-3 text-center">
+              <p class="text-xl font-bold text-gray-900">{categoryBusinesses.length}</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">Negocios</p>
+            </div>
+            <div class="rounded-2xl bg-gray-50 p-3 text-center">
+              <p class="text-xl font-bold text-gray-900">{verifiedCount}</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">Verificados</p>
+            </div>
+          </div>
+
+          <!-- Filtro por área -->
+          {areasInCategory.length > 1 && (
+            <div>
+              <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Áreas</p>
+              <div class="space-y-1">
+                <button
+                  class="area-filter w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition bg-gray-900 text-white"
+                  data-area="all"
+                  aria-label="Mostrar todos los negocios"
+                >
+                  <span>Todas</span>
+                  <span class="text-xs opacity-60">{categoryBusinesses.length}</span>
+                </button>
+                {areasInCategory.map((area) => {
+                  const count = categoryBusinesses.filter((b) => b.area?.slug === area.slug).length;
+                  return (
+                    <button
+                      class="area-filter w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                      data-area={area.slug}
+                      aria-label={`Filtrar por área ${area.name}`}
+                    >
+                      <span>{area.name}</span>
+                      <span class="text-xs text-gray-400">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <!-- Filtros atributos -->
+          <div>
+            <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Filtrar por</p>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" id="filterVerified" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Solo verificados</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" id="filterFeatured" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Solo destacados</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" id="filterDelivery" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Con delivery</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" id="filterCard" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Acepta tarjeta</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ── GRID ── -->
+      <div class="flex-1 min-w-0">
+
+        <!-- Filtros áreas móvil -->
+        {areasInCategory.length > 1 && (
+          <div class="flex gap-2 overflow-x-auto pb-2 mb-6 lg:hidden">
+            <button class="area-filter shrink-0 rounded-full border border-gray-200 bg-gray-900 px-4 py-1.5 text-sm font-medium text-white" data-area="all" aria-label="Filtrar por todas las áreas">
+              Todas
+            </button>
+            {areasInCategory.map((area) => (
+              <button class="area-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-600" data-area={area.slug} aria-label={`Filtrar por área ${area.name}`}>
+                {area.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {categoryBusinesses.length > 0 ? (
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3" id="businessGrid">
+            {categoryBusinesses.map((business) => (
+              <BusinessCard business={business} />
+            ))}
+          </div>
+
+          <EmptyState 
+            id="emptyFiltered" 
+            icon="🔍" 
+            title="Sin resultados" 
+            description="Prueba con otros filtros." 
+            visible={false} 
+          />
+        ) : (
+          <EmptyState 
+            icon="🏪" 
+            title="Sin negocios en esta categoría" 
+            description="Pronto habrá negocios registrados aquí." 
+          />
+        )}
+      </div>
+
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const areaFilters   = document.querySelectorAll<HTMLElement>(".area-filter");
+  const cards         = document.querySelectorAll<HTMLElement>(".business-card");
+  const emptyFiltered = document.getElementById("emptyFiltered");
+
+  const checkVerified = document.getElementById("filterVerified") as HTMLInputElement | null;
+  const checkFeatured = document.getElementById("filterFeatured") as HTMLInputElement | null;
+  const checkDelivery = document.getElementById("filterDelivery") as HTMLInputElement | null;
+  const checkCard     = document.getElementById("filterCard")     as HTMLInputElement | null;
+
+  let activeArea = "all";
+
+  function applyFilters() {
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const area     = card.dataset.area ?? "";
+      const verified = card.dataset.verified === "true";
+      const featured = card.dataset.featured === "true";
+      const delivery = card.dataset.delivery === "true";
+      const hasCard  = card.dataset.card === "true";
+
+      const matchArea     = activeArea === "all" || area === activeArea;
+      const matchVerified = !checkVerified?.checked || verified;
+      const matchFeatured = !checkFeatured?.checked || featured;
+      const matchDelivery = !checkDelivery?.checked || delivery;
+      const matchCard     = !checkCard?.checked     || hasCard;
+
+      const show = matchArea && matchVerified && matchFeatured && matchDelivery && matchCard;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+
+    emptyFiltered?.classList.toggle("hidden", visible > 0);
+  }
+
+  areaFilters.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeArea = btn.dataset.area ?? "all";
+
+      areaFilters.forEach((f) => {
+        f.classList.remove("bg-gray-900", "text-white");
+        f.classList.add("bg-white", "text-gray-600");
+      });
+      btn.classList.add("bg-gray-900", "text-white");
+      btn.classList.remove("bg-white", "text-gray-600");
+
+      applyFilters();
+    });
+  });
+
+  [checkVerified, checkFeatured, checkDelivery, checkCard].forEach((el) => {
+    el?.addEventListener("change", applyFilters);
+  });
+</script>

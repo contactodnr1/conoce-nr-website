@@ -1,0 +1,44 @@
+---
+// src/components/global/EmptyState.astro
+// Estado vacío reutilizable para cuando no hay resultados o datos.
+
+interface Props {
+  /** Emoji o texto del ícono (ej. "🔍", "🏪") */
+  icon?: string;
+  /** Título principal del estado vacío */
+  title: string;
+  /** Descripción opcional debajo del título */
+  description?: string;
+  /** ID para el elemento (útil para toggling con JS) */
+  id?: string;
+  /** Si es true, se muestra. Si es false, está hidden. Por defecto: true */
+  visible?: boolean;
+  /** Clase extra */
+  class?: string;
+}
+
+const {
+  icon = "🔍",
+  title,
+  description,
+  id,
+  visible = true,
+  class: extraClass = "",
+} = Astro.props;
+---
+
+<div
+  id={id}
+  class:list={[
+    "flex flex-col items-center justify-center py-16 text-center",
+    !visible && "hidden",
+    extraClass,
+  ]}
+>
+  {icon && <p class="text-4xl mb-3">{icon}</p>}
+  <p class="font-semibold text-gray-700">{title}</p>
+  {description && (
+    <p class="mt-1 text-sm text-gray-400 max-w-xs">{description}</p>
+  )}
+  <slot />
+</div>

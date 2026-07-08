@@ -1,0 +1,96 @@
+---
+// src/components/FilterAside.astro
+// Aside de filtros reutilizable para páginas de área y categoría
+
+interface FilterItem {
+  slug: string;
+  name: string;
+  count: number;
+}
+
+interface Props {
+  totalCount: number;
+  verifiedCount: number;
+  /** "Categorías" o "Áreas" */
+  filterLabel?: string;
+  /** data-category o data-area */
+  filterAttr?: string;
+  filters?: FilterItem[];
+}
+
+const {
+  totalCount,
+  verifiedCount,
+  filterLabel = "Categorías",
+  filterAttr = "data-category",
+  filters = [],
+} = Astro.props;
+---
+
+<aside class="hidden lg:block w-56 shrink-0">
+  <div class="sticky top-6 space-y-6">
+
+    <!-- Mini stats -->
+    <div class="grid grid-cols-2 gap-2">
+      <div class="rounded-2xl bg-gray-50 p-3 text-center">
+        <p class="text-xl font-bold text-gray-900">{totalCount}</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Negocios</p>
+      </div>
+      <div class="rounded-2xl bg-gray-50 p-3 text-center">
+        <p class="text-xl font-bold text-gray-900">{verifiedCount}</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">Verificados</p>
+      </div>
+    </div>
+
+    <!-- Filtro principal (categorías o áreas) -->
+    {filters.length > 1 && (
+      <div>
+        <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">{filterLabel}</p>
+        <div class="space-y-1" id="primaryFilters">
+          <button
+            class="primary-filter w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition bg-gray-900 text-white"
+            data-filter="all"
+            aria-label="Filtrar por todos"
+          >
+            <span>Todos</span>
+            <span class="text-xs opacity-60">{totalCount}</span>
+          </button>
+          {filters.map((f) => (
+            <button
+              class="primary-filter w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+              data-filter={f.slug}
+              aria-label={`Filtrar por ${f.name}`}
+            >
+              <span>{f.name}</span>
+              <span class="text-xs text-gray-400">{f.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Filtros atributos -->
+    <div>
+      <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Filtrar por</p>
+      <div class="space-y-2">
+        <label class="flex items-center gap-2.5 cursor-pointer group">
+          <input type="checkbox" id="filterVerified" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+          <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Solo verificados</span>
+        </label>
+        <label class="flex items-center gap-2.5 cursor-pointer group">
+          <input type="checkbox" id="filterFeatured" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+          <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Solo destacados</span>
+        </label>
+        <label class="flex items-center gap-2.5 cursor-pointer group">
+          <input type="checkbox" id="filterDelivery" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+          <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Con delivery</span>
+        </label>
+        <label class="flex items-center gap-2.5 cursor-pointer group">
+          <input type="checkbox" id="filterCard" class="h-4 w-4 rounded border-gray-300 accent-gray-900 cursor-pointer"/>
+          <span class="text-sm text-gray-600 group-hover:text-gray-900 transition">Acepta tarjeta</span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+</aside>

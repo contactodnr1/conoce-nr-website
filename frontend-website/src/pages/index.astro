@@ -1,0 +1,46 @@
+---
+import Hero from "../components/global/Hero.astro";
+import Layout from "../layouts/Layout.astro";
+import { getFeaturedBusinesses } from "../services/getFeaturedBussines/getfeaturedBussinnes";
+
+import type { Business } from "../types/business";
+
+const businesses = await getFeaturedBusinesses();
+
+---
+
+<Layout>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Descubre Nicolás Romero",
+      url: "https://nicolasromero.mx",
+      description: "Directorio local de negocios, servicios y comercios en Nicolás Romero, Estado de México.",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: "https://nicolasromero.mx/explorar?q={search_term_string}",
+        },
+        "query-input": "required name=search_term_string",
+      },
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Descubre Nicolás Romero",
+      url: "https://nicolasromero.mx",
+      logo: "https://nicolasromero.mx/logo2.png",
+      sameAs: [
+        "https://www.facebook.com/profile.php?id=61590639226998",
+      ],
+      areaServed: {
+        "@type": "City",
+        name: "Nicolás Romero",
+        sameAs: "https://es.wikipedia.org/wiki/Nicol%C3%A1s_Romero_(municipio)",
+      },
+    })} />
+  </Fragment>
+  <Hero/>
+</Layout>

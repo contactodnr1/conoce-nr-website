@@ -1,0 +1,123 @@
+---
+// src/components/BusinessCard.astro
+
+interface Business {
+  slug: string;
+  name: string;
+  shortDescription?: string;
+  verified?: boolean;
+  featured?: boolean;
+  homeDelivery?: boolean;
+  acceptsCard?: boolean;
+  coverImage?: { url: string };
+  logo?: { url: string };
+  area?: { name: string; slug: string };
+  categories?: { name: string; slug: string }[];
+}
+
+interface Props {
+  business: Business;
+  /** data-* attrs para el filtro JS. Pasa un string con los slugs separados por coma o el slug del área */
+  dataCategories?: string;
+  dataArea?: string;
+}
+
+const { business, dataCategories, dataArea } = Astro.props;
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+---
+
+<a
+  href={`/negocios/${business.slug}`}
+  class="business-card group block w-full min-w-0 overflow-hidden rounded-3xl bg-white transition hover:shadow-xl hover:-translate-y-0.5 duration-300"
+  data-categories={dataCategories ?? business.categories?.map((c) => c.slug).join(",") ?? ""}
+  data-area={dataArea ?? business.area?.slug ?? ""}
+  data-verified={business.verified ? "true" : "false"}
+  data-featured={business.featured ? "true" : "false"}
+  data-delivery={business.homeDelivery ? "true" : "false"}
+  data-card={business.acceptsCard ? "true" : "false"}
+>
+  <!-- Cover -->
+  <div class="relative">
+    <div class="relative h-40 overflow-hidden sm:h-44">
+      <img
+        src={img(business.coverImage?.url)}
+        alt={business.name}
+        loading="lazy"
+        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+
+      <!-- Badges -->
+      <div class="absolute right-2 top-2 flex max-w-[75%] flex-wrap justify-end gap-1 sm:right-3 sm:top-3 sm:gap-1.5">
+        {business.verified && (
+          <span class="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold text-gray-800 sm:px-2.5 sm:py-1 sm:text-[11px]">
+            <svg class="h-3 w-3 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            Verificado
+          </span>
+        )}
+        {business.featured && (
+          <span class="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold text-amber-900 shadow-sm sm:px-2.5 sm:py-1 sm:text-[11px]">
+            ★ Destacado
+          </span>
+        )}
+      </div>
+    </div>
+
+    <!-- Logo -->
+    {business.logo?.url && (
+      <div class="absolute bottom-0 left-3 z-10 h-14 w-14 translate-y-1/2 overflow-hidden rounded-xl border-2 border-white shadow-md sm:left-4 sm:h-20 sm:w-20">
+        <img src={img(business.logo.url)} alt={`Logo de ${business.name}`} class="h-full w-full object-cover"/>
+      </div>
+    )}
+  </div>
+
+  <!-- Info -->
+  <div class="border-x border-b border-gray-100 rounded-b-3xl px-3 pb-4 pt-8 sm:px-4 sm:pt-9">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0 flex-1">
+        <h3 class="truncate font-semibold text-gray-900">{business.name}</h3>
+        {business.area?.name && (
+          <p class="mt-0.5 flex items-center gap-1 text-[11px] text-gray-400">
+            <svg class="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span class="truncate">{business.area.name}</span>
+          </p>
+        )}
+      </div>
+      <div class="flex shrink-0 flex-col items-end gap-1">
+        {business.homeDelivery && (
+          <span class="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-medium text-sky-600">
+            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12"/>
+            </svg>
+            Delivery
+          </span>
+        )}
+        {business.acceptsCard && (
+          <span class="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-medium text-violet-600">
+            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Tarjeta
+          </span>
+        )}
+      </div>
+    </div>
+    {business.shortDescription && (
+      <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-gray-500">
+        {business.shortDescription}
+      </p>
+    )}
+  </div>
+</a>
