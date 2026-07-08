@@ -4,7 +4,7 @@
   "private": true,
   "description": "A Strapi application",
   "scripts": {
-    "build": "strapi build --clean",
+    "build": "strapi build",
     "postbuild": "node -e \"const fs=require('fs');const p='.strapi/client/index.html';fs.writeFileSync(p,fs.readFileSync(p,'utf8').replace(/\\\\/g,'/'))\"",
     "console": "strapi console",
     "deploy": "strapi deploy",
