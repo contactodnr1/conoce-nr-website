@@ -1,9 +1,9 @@
 ---
 import { getFeaturedBusinesses } from "../../services/getFeaturedBussines/getfeaturedBussinnes";
+import { resolveImageUrl } from "../../utils/image";
 
 const businesses = await getFeaturedBusinesses();
 const loopList = [...businesses, ...businesses];
-const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
 ---
 
 <div class="flex flex-col gap-4">
@@ -25,7 +25,7 @@ const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
 
           <div class="relative h-20">
             <img
-              src={biz.coverImage?.url ? `${STRAPI_URL}${biz.coverImage.url}` : "/images/placeholder-business.svg"}
+              src={resolveImageUrl(biz.coverImage?.url, "/images/placeholder-business.svg")}
               alt={biz.name}
               loading="lazy"
               class="h-full w-full object-cover"
@@ -47,7 +47,7 @@ const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
               <div class="relative h-11 w-11">
                 <div class="h-11 w-11 overflow-hidden rounded-xl border-2 border-white bg-gray-50 shadow-sm">
                   <img
-                    src={biz.logo?.url ? `${STRAPI_URL}${biz.logo.url}` : "/images/placeholder-logo.svg"}
+                    src={resolveImageUrl(biz.logo?.url, "/images/placeholder-logo.svg")}
                     alt={`Logo de ${biz.name}`}
                     loading="lazy"
                     class="h-full w-full object-cover"

@@ -1,0 +1,68 @@
+---
+interface Props {
+  name: string;
+  heroImage: string;
+  galleryImages: { url: string; alternativeText?: string }[];
+}
+
+const { name, heroImage, galleryImages } = Astro.props;
+const previewGallery = galleryImages.slice(0, 4);
+---
+
+{
+  galleryImages.length >= 3 ? (
+    <div class="hidden md:grid grid-cols-[2fr_1fr] gap-2 h-[480px] overflow-hidden rounded-none md:rounded-b-3xl">
+      <div class="overflow-hidden">
+        <img
+          src={heroImage}
+          alt={name}
+          fetchpriority="high"
+          class="h-full w-full object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+          id="heroMain"
+        />
+      </div>
+      <div class="grid grid-rows-2 gap-2">
+        {previewGallery.slice(0, 2).map((g, i) => (
+          <div class="overflow-hidden relative">
+            <img
+              src={g.url?.startsWith("http") ? g.url : `${import.meta.env.PUBLIC_STRAPI_URL}${g.url}`}
+              alt={`Foto ${i + 2}`}
+              loading="lazy"
+              class="h-full w-full object-cover hover:scale-[1.02] transition-transform duration-500 cursor-pointer gallery-thumb"
+              data-index={i}
+            />
+            {i === 1 && galleryImages.length > 3 && (
+              <button
+                id="btnShowAll"
+                aria-label="Ver todas las fotos"
+                class="absolute inset-0 flex items-end justify-end p-3 cursor-pointer"
+              >
+                <span class="rounded-xl bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-gray-800 shadow hover:bg-white transition-colors">
+                  Ver todas las fotos ({galleryImages.length})
+                </span>
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <div class="hidden md:block h-[420px] overflow-hidden md:rounded-b-3xl">
+      <img
+        src={heroImage}
+        alt={name}
+        fetchpriority="high"
+        class="h-full w-full object-cover"
+      />
+    </div>
+  )
+}
+
+<div class="md:hidden h-64 overflow-hidden">
+  <img
+    src={heroImage}
+    alt={name}
+    fetchpriority="high"
+    class="h-full w-full object-cover"
+  />
+</div>

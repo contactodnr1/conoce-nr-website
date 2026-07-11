@@ -1,0 +1,52 @@
+---
+interface DaySchedule {
+  label: string;
+  open?: string | null;
+  close?: string | null;
+}
+
+interface Props {
+  days: DaySchedule[];
+}
+
+const { days } = Astro.props;
+
+function formatTime(t?: string | null): string {
+  if (!t) return "—";
+  const [h, m] = t.split(":");
+  const hour = parseInt(h);
+  const ampm = hour >= 12 ? "pm" : "am";
+  const h12 = hour % 12 || 12;
+  return `${h12}:${m} ${ampm}`;
+}
+
+const dayMap = [6, 0, 1, 2, 3, 4, 5];
+---
+
+<div class="rounded-2xl border border-gray-100 overflow-hidden">
+  {days.map(({ label, open, close }, i) => {
+    const isToday = dayMap[new Date().getDay()] === i;
+    return (
+      <div
+        class:list={[
+          "flex items-center justify-between px-5 py-3 text-sm",
+          isToday ? "bg-emerald-50" : i % 2 === 0 ? "bg-white" : "bg-gray-50/40",
+        ]}
+      >
+        <span class:list={["font-medium w-28", isToday ? "text-emerald-700" : "text-gray-700"]}>
+          {label}
+          {isToday && (
+            <span class="ml-2 text-[10px] font-semibold uppercase tracking-wide text-emerald-500">hoy</span>
+          )}
+        </span>
+        {open && close ? (
+          <span class:list={[isToday ? "text-emerald-600 font-semibold" : "text-gray-500"]}>
+            {formatTime(open)} – {formatTime(close)}
+          </span>
+        ) : (
+          <span class="text-gray-300">Cerrado</span>
+        )}
+      </div>
+    );
+  })}
+</div>

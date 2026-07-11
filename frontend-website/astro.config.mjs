@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+  // adapter: cloudflare(),
   site: 'https://nicolasromero.mx',
   prefetch: {
     prefetchAll: true,

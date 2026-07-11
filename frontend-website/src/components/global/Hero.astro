@@ -3,10 +3,10 @@ import { getFeaturedBusinesses } from "../../services/getFeaturedBussines/getfea
 import { getCategories } from "../../services/getCategories/getCategories";
 import BusinessCard from "./BusinessCard.astro";
 import SearchBar from "./SearchBar.astro";
+import { resolveImageUrl } from "../../utils/image";
 
 const businesses = await getFeaturedBusinesses();
 const categories = await getCategories();
-const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
 ---
 
 <section class="py-10 sm:py-14 lg:min-h-screen lg:flex lg:items-center">
@@ -54,11 +54,7 @@ const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
                 >
                   {/* Imagen de fondo */}
                   <img
-                    src={
-                      category.image?.url
-                        ? `${STRAPI_URL}${category.image.url}`
-                        : "/images/placeholder-category.svg"
-                    }
+                    src={resolveImageUrl(category.image?.url, "/images/placeholder-category.svg")}
                     alt={category.name}
                     loading="lazy"
                     class="absolute inset-0 h-full w-full object-cover"
@@ -71,7 +67,7 @@ const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
                     {category.icon?.url && (
                       <div class="">
                         <img
-                          src={`${STRAPI_URL}${category.icon.url}`}
+                          src={resolveImageUrl(category.icon?.url)}
                           alt=""
                           class="h-7 w-7 bg-white rounded-full p-1 object-contain drop-shadow-sm"
                         />
