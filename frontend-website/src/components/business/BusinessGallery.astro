@@ -1,0 +1,50 @@
+---
+interface Props {
+  images: { url: string; alternativeText?: string | null }[];
+}
+
+const { images } = Astro.props;
+
+const STRAPI_URL = import.meta.env.PUBLIC_STRAPI_URL;
+
+function img(url?: string | null): string {
+  if (!url) return "/images/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `${STRAPI_URL}${url}`;
+}
+---
+
+{
+  images.length > 0 && (
+    <div class="border-b border-gray-100 pb-10">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Fotos</h2>
+        {images.length > 3 && (
+          <button
+            id="btnShowAll2"
+            aria-label="Ver todas las fotos"
+            class="cursor-pointer text-sm font-medium text-gray-500 underline underline-offset-2 hover:text-gray-800 transition-colors"
+          >
+            Ver todas ({images.length})
+          </button>
+        )}
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        {images.slice(0, 6).map((image, i) => (
+          <button
+            class="gallery-thumb group overflow-hidden rounded-xl aspect-square"
+            data-index={i}
+            aria-label={`Ver foto ${i + 1}`}
+          >
+            <img
+              src={img(image.url)}
+              alt={image.alternativeText ?? `Foto ${i + 1}`}
+              loading="lazy"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,103 @@
+---
+interface Props {
+  address?: string | null;
+  areaName?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+const { address, areaName, latitude, longitude } = Astro.props;
+---
+
+<div class="border-b border-gray-100 pb-10">
+  <h2 class="text-lg font-semibold text-gray-900 mb-1">Dónde encontrarnos</h2>
+  {
+    (address || areaName) && (
+      <p class="text-sm text-gray-500 mb-4 flex items-center gap-1.5">
+        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        {address ?? "Nicolás Romero, Estado de México"}
+        {areaName && `, ${areaName}`}
+      </p>
+    )
+  }
+
+  <div
+    id="bizMap"
+    class="overflow-hidden rounded-2xl border border-gray-100 shadow-sm z-0"
+    style="height:288px; min-height:288px;"
+    data-lat={latitude}
+    data-lng={longitude}
+    data-mode={latitude && longitude ? "circle" : "municipio"}
+  />
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script data-astro-rerun>
+(function () {
+  var mapEl = document.getElementById("bizMap");
+  if (!mapEl) return;
+  if (mapEl._leaflet_map) {
+    mapEl._leaflet_map.remove();
+    delete mapEl._leaflet_map;
+  }
+  var mode = mapEl.getAttribute("data-mode");
+  var lat = parseFloat(mapEl.getAttribute("data-lat"));
+  var lng = parseFloat(mapEl.getAttribute("data-lng"));
+  var hasCoords = !isNaN(lat) && !isNaN(lng);
+
+  if (hasCoords && mode === "circle") {
+    var map = window.L.map("bizMap", {
+      center: [lat, lng],
+      zoom: 15,
+      zoomControl: false,
+      scrollWheelZoom: false,
+      attributionControl: false,
+    });
+    mapEl._leaflet_map = map;
+    window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    window.L.circle([lat, lng], {
+      radius: 350,
+      color: "#f97316",
+      fillColor: "#f97316",
+      fillOpacity: 0.15,
+      weight: 5,
+    }).addTo(map);
+    window.L.control.zoom({ position: "bottomright" }).addTo(map);
+    window.L.control.attribution({ position: "bottomleft", prefix: false })
+      .addAttribution('\u00a9 <a href="https://www.openstreetmap.org/copyright">OSM</a>')
+      .addTo(map);
+  } else {
+    var map = window.L.map("bizMap", {
+      center: [19.634, -99.370],
+      zoom: 11,
+      zoomControl: false,
+      scrollWheelZoom: false,
+      attributionControl: false,
+    });
+    mapEl._leaflet_map = map;
+    window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    fetch("/data/nicolas-romero.geojson")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var polygon = window.L.geoJSON(data, {
+          style: {
+            color: "#f97316",
+            fillColor: "#f97316",
+            fillOpacity: 0.1,
+            weight: 3,
+          },
+        }).addTo(map);
+        map.fitBounds(polygon.getBounds().pad(0.05));
+      })
+      .catch(function () {});
+    window.L.control.zoom({ position: "bottomright" }).addTo(map);
+    window.L.control.attribution({ position: "bottomleft", prefix: false })
+      .addAttribution('\u00a9 <a href="https://www.openstreetmap.org/copyright">OSM</a>')
+      .addTo(map);
+  }
+})();
+</script>

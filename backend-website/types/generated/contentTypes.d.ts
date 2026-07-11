@@ -520,6 +520,7 @@ export interface ApiBusinessBusiness extends Struct.CollectionTypeSchema {
     logo: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     name: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    recomendando: Schema.Attribute.Boolean;
     schedule: Schema.Attribute.Component<'shared.schedule', false>;
     seo: Schema.Attribute.Component<'shared.seo', false>;
     shortDescription: Schema.Attribute.String;

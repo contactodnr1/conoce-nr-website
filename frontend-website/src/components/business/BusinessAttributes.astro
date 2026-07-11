@@ -1,0 +1,96 @@
+---
+interface Props {
+  businessModel?: string | null;
+  acceptsCard?: boolean | null;
+  homeDelivery?: boolean | null;
+  todaySchedule?: { label: string; open?: string | null; close?: string | null } | null;
+}
+
+const { businessModel, acceptsCard, homeDelivery, todaySchedule } = Astro.props;
+
+function formatTime(t?: string | null): string {
+  if (!t) return "—";
+  const [h, m] = t.split(":");
+  const hour = parseInt(h);
+  const ampm = hour >= 12 ? "pm" : "am";
+  const h12 = hour % 12 || 12;
+  return `${h12}:${m} ${ampm}`;
+}
+
+const modelLabel: Record<string, string> = {
+  physical: "Presencial",
+  online: "En línea",
+  both: "Presencial y en línea",
+};
+---
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+  {
+    businessModel && (
+      <div class="flex flex-col gap-1.5 rounded-xl border-l-[3px] border-l-primary bg-surface p-4">
+        <svg class="h-[18px] w-[18px] text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <p class="text-[10px] font-medium uppercase tracking-widest text-muted">Modalidad</p>
+        <p class="text-sm font-semibold text-text">{modelLabel[businessModel] ?? businessModel}</p>
+      </div>
+    )
+  }
+
+  <div
+    class:list={[
+      "flex flex-col gap-1.5 rounded-xl border-l-[3px] bg-surface p-4",
+      acceptsCard ? "border-l-primary" : "border-l-gray-200",
+    ]}
+  >
+    <svg class:list={["h-[18px] w-[18px]", acceptsCard ? "text-primary" : "text-muted"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    </svg>
+    <p class="text-[10px] font-medium uppercase tracking-widest text-muted">Pago</p>
+    <p class:list={["text-sm font-semibold", acceptsCard ? "text-text" : "text-muted"]}>
+      {acceptsCard ? "Efectivo y tarjeta" : "Solo efectivo"}
+    </p>
+  </div>
+
+  <div
+    class:list={[
+      "flex flex-col gap-1.5 rounded-xl border-l-[3px] bg-surface p-4",
+      homeDelivery ? "border-l-primary" : "border-l-gray-200",
+    ]}
+  >
+    <svg class:list={["h-[18px] w-[18px]", homeDelivery ? "text-primary" : "text-muted"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12h12l1-12" />
+    </svg>
+    <p class="text-[10px] font-medium uppercase tracking-widest text-muted">Delivery</p>
+    <p class:list={["text-sm font-semibold", homeDelivery ? "text-text" : "text-muted"]}>
+      {homeDelivery ? "Disponible" : "No disponible"}
+    </p>
+  </div>
+
+  {
+    todaySchedule && (
+      <div
+        class:list={[
+          "flex flex-col gap-1.5 rounded-xl border-l-[3px] bg-surface p-4",
+          todaySchedule.open && todaySchedule.close ? "border-l-primary" : "border-l-gray-200",
+        ]}
+      >
+        <svg class:list={["h-[18px] w-[18px]", todaySchedule.open && todaySchedule.close ? "text-primary" : "text-muted"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-[10px] font-medium uppercase tracking-widest text-muted">Hoy — {todaySchedule.label}</p>
+        <p class:list={["text-sm font-semibold", todaySchedule.open && todaySchedule.close ? "text-text" : "text-muted"]}>
+          {todaySchedule.open && todaySchedule.close
+            ? `${formatTime(todaySchedule.open)} – ${formatTime(todaySchedule.close)}`
+            : "Cerrado hoy"}
+        </p>
+        {todaySchedule.open && todaySchedule.close && (
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 w-fit">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Abierto ahora
+          </span>
+        )}
+      </div>
+    )
+  }
+</div>

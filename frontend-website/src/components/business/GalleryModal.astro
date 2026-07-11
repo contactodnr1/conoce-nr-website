@@ -1,0 +1,56 @@
+---
+interface Props {
+  show: boolean;
+}
+
+const { show } = Astro.props;
+---
+
+{
+  show && (
+    <div
+      id="galleryModal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/95 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Galería de fotos"
+    >
+      <button
+        id="btnCloseModal"
+        aria-label="Cerrar galería de fotos"
+        class="cursor-pointer absolute right-5 top-5 rounded-full bg-white/10 p-2.5 text-white hover:bg-white/20 transition-colors"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <button
+        id="btnPrev"
+        aria-label="Foto anterior"
+        class="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        id="btnNext"
+        aria-label="Siguiente foto"
+        class="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      <div class="flex flex-col items-center gap-4 w-full max-w-4xl">
+        <img
+          id="modalImg"
+          src=""
+          alt="Foto del negocio"
+          class="max-h-[82vh] max-w-full rounded-2xl object-contain"
+        />
+        <span id="modalCounter" class="text-sm text-white/50 font-medium" />
+      </div>
+    </div>
+  )
+}
